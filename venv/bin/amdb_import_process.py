@@ -13,8 +13,8 @@ logger = get_logger("import_auto.log")
 conf = get_conf()
 PROCESS_INFO = conf.get("SOURCE_FILE", "AMDB_PROCESS_INFO")
 IP_INFO = conf.get("SOURCE_FILE", "AMDB_IP_INFO")
-PROCESS_TABLE = "AUTO_AMDB_PROCESS"
-IP_TABLE = "AUTO_AMDB_IP"
+PROCESS_TABLE = "AUTO_AMDB_PROCESS_RAW"
+IP_TABLE = "AUTO_AMDB_IP_RAW"
 
 # 设置全局变量
 write_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

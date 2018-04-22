@@ -40,12 +40,7 @@ def main():
     conn = get_conn()
     cursor = conn.cursor()
 
-    sql = "select max(VERSION) from {0}".format(PROCESS_CONF_TABLE)
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    cur_version = rows[0][0]
-
-    sql = "select distinct(DEPLOY_IP) from {0} where VERSION={1}".format(PROCESS_CONF_TABLE,cur_version)
+    sql = "select distinct(DEPLOY_IP) from {0}".format(PROCESS_CONF_TABLE)
     cursor.execute(sql)
     rows = cursor.fetchall()
     for row in rows:
@@ -53,14 +48,14 @@ def main():
         config_file_path = os.path.join(CONF_PATH,deploy_ip)
         mkdir(config_file_path)
 
-        config_file = os.path.join(config_file_path,"M03_PROCESS_AMDB.conf")
-        config_file_backup = os.path.join(config_file_path,"M03_PROCESS_AMDB.conf.bak")
-        config_file_tmp = os.path.join(config_file_path,"M03_PROCESS_AMDB.conf.tmp")
+        config_file = os.path.join(config_file_path,"M03_Process_Auto.conf")
+        config_file_backup = os.path.join(config_file_path,"M03_Process_Auto.conf.bak")
+        config_file_tmp = os.path.join(config_file_path,"M03_Process_Auto.conf.tmp")
 
         with open(config_file_tmp,'w',encoding="UTF-8") as file:
             deploy_ip = row[0]
-            sql = "select UUID,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT from {0} where DEPLOY_IP='{1}' and VERSION={2} ".format(
-                PROCESS_CONF_TABLE, deploy_ip,cur_version)
+            sql = "select UUID,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where DEPLOY_IP='{1}'".format(
+                PROCESS_CONF_TABLE, deploy_ip)
             cursor.execute(sql)
             rs = cursor.fetchall()
             for r in rs:
@@ -71,7 +66,9 @@ def main():
                 process_command = r[4]
                 min_count = r[5]
                 max_count = r[6]
-                content = "{0}#{1}#{2}#{3}#{4}#{5}#{6}\n".format(uuid,vip,process_desc,process_user,process_command,min_count,max_count)
+                begin_time = r[7]
+                end_time = r[8]
+                content = "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}#{8}\n".format(uuid,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time)
                 file.write(content)
 
         if os.path.exists(config_file):
@@ -126,5 +123,3 @@ def mkdir(path):
 
 if __name__ == '__main__':
         main()
-
-

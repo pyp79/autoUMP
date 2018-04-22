@@ -10,9 +10,9 @@ import uuid
 logger = get_logger("process.log")
 
 # 特定参数
-PROCESS_CONF_TABLE = "AUTO_PROCESS_CONF"
-PROCESS_TABLE = "AUTO_AMDB_PROCESS"
-IP_TABLE = "AUTO_AMDB_IP"
+PROCESS_CONF_TABLE = "AUTO_AMDB_PROCESS_CONF"
+PROCESS_TABLE = "AUTO_AMDB_PROCESS_RAW"
+IP_TABLE = "AUTO_AMDB_IP_RAW"
 
 # 设置全局变量
 write_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -45,21 +45,29 @@ def main():
             for host_ip in ip_list:
                 deploy_ip = host_ip
                 vip = ip_address
-                sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(
+                sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(
                     PROCESS_TABLE, ip_address,cur_version)
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 for row in rows:
-                    id = str(uuid.uuid4())
                     process_desc = row[0]
                     process_user = row[1]
                     process_command = row[2]
                     min_count = row[3]
                     max_count = row[4]
-                    sql = '''insert into {0} (UUID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT) 
-                          values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
+                    begin_time_raw = row[5]
+                    end_time_raw = row[6]
+
+                    begin_time = int(begin_time_raw.split(':')[0] + begin_time_raw.split(':')[1])
+                    end_time = int(end_time_raw.split(':')[0] + end_time_raw.split(':')[1])
+
+                    key = host_ip + process_user + process_command
+                    id = str(uuid.uuid3(uuid.NAMESPACE_DNS,key))
+
+                    sql = '''insert into {0} (UUID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
+                          values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
                     para = [id, cur_version, write_time, deploy_ip, host_ip, vip, process_desc, process_user,
-                            process_command, min_count, max_count]
+                            process_command, min_count, max_count,begin_time,end_time]
                     cursor.execute(sql, para)
                     counter += 1
 
@@ -68,7 +76,7 @@ def main():
             host_ip = ip_address
             vip = ip_address
 
-            sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(PROCESS_TABLE,ip_address,cur_version)
+            sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(PROCESS_TABLE,ip_address,cur_version)
             cursor.execute(sql)
             rows = cursor.fetchall()
             for row in rows:
@@ -78,9 +86,18 @@ def main():
                 process_command = row[2]
                 min_count = row[3]
                 max_count = row[4]
-                sql = '''insert into {0} (UUID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT) 
-                      values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
-                para = [id,cur_version,write_time,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count]
+                begin_time_raw = row[5]
+                end_time_raw = row[6]
+
+                begin_time = int(begin_time_raw.split(':')[0] + begin_time_raw.split(':')[1])
+                end_time = int(end_time_raw.split(':')[0] + end_time_raw.split(':')[1])
+
+                key = host_ip + process_user + process_command
+                id = str(uuid.uuid3(uuid.NAMESPACE_DNS, key))
+
+                sql = '''insert into {0} (UUID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
+                      values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
+                para = [id,cur_version,write_time,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time]
                 cursor.execute(sql,para)
                 counter += 1
     conn.commit()
