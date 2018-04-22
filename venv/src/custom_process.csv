@@ -1,0 +1,2 @@
+ACTION,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_TYPE
+ADD,1.1.1.1,1.1.1.1,2.2.2.3,晨星批量接口服务,cbwmsapp,/bin/sh /weblogic/domains/cbwms_domain/bin/startManagedWebLogic.sh AapServer03 http://10.1.48.77:17101,2,2,0,2200,APP
