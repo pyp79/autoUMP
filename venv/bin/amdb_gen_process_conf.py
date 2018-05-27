@@ -4,7 +4,6 @@
 
 import datetime
 from sub_common import *
-import uuid
 
 # 设置log
 logger = get_logger("process.log")
@@ -16,6 +15,7 @@ IP_TABLE = "AUTO_AMDB_IP_RAW"
 
 # 设置全局变量
 write_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+version = datetime.datetime.now().strftime('%Y%m%d')
 global counter
 
 def main():
@@ -27,26 +27,21 @@ def main():
     conn = get_conn()
     cursor = conn.cursor()
 
-    sql = "select max(VERSION) from {0}".format(PROCESS_TABLE)
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    cur_version = rows[0][0]
-
-    sql = "delete from {0} where VERSION='{1}'".format(PROCESS_CONF_TABLE,cur_version)
+    sql = "delete from {0} where VERSION='{1}'".format(PROCESS_CONF_TABLE,version)
     cursor.execute(sql)
 
-    sql = "select distinct(IP_ADDRESS) from {0} where VERSION={1}".format(PROCESS_TABLE,cur_version)
+    sql = "select distinct(IP_ADDRESS) from {0} where VERSION={1}".format(PROCESS_TABLE,version)
     cursor.execute(sql)
     rows = cursor.fetchall()
     for row in rows:
         ip_address = row[0]
-        if is_vip(cur_version,ip_address):
-            ip_list = vip_to_hostip(cur_version,ip_address)
+        if is_vip(version,ip_address):
+            ip_list = vip_to_hostip(version,ip_address)
             for host_ip in ip_list:
                 deploy_ip = host_ip
                 vip = ip_address
-                sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(
-                    PROCESS_TABLE, ip_address,cur_version)
+                sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_ID from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(
+                    PROCESS_TABLE, ip_address,version)
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 for row in rows:
@@ -57,16 +52,14 @@ def main():
                     max_count = row[4]
                     begin_time_raw = row[5]
                     end_time_raw = row[6]
+                    process_id = row[7]
 
                     begin_time = int(begin_time_raw.split(':')[0] + begin_time_raw.split(':')[1])
                     end_time = int(end_time_raw.split(':')[0] + end_time_raw.split(':')[1])
 
-                    key = host_ip + process_user + process_command
-                    id = str(uuid.uuid3(uuid.NAMESPACE_DNS,key))
-
-                    sql = '''insert into {0} (UUID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
+                    sql = '''insert into {0} (PROCESS_ID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
                           values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
-                    para = [id, cur_version, write_time, deploy_ip, host_ip, vip, process_desc, process_user,
+                    para = [process_id, version, write_time, deploy_ip, host_ip, vip, process_desc, process_user,
                             process_command, min_count, max_count,begin_time,end_time]
                     cursor.execute(sql, para)
                     counter += 1
@@ -76,11 +69,10 @@ def main():
             host_ip = ip_address
             vip = ip_address
 
-            sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(PROCESS_TABLE,ip_address,cur_version)
+            sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_ID from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(PROCESS_TABLE,ip_address,version)
             cursor.execute(sql)
             rows = cursor.fetchall()
             for row in rows:
-                id = str(uuid.uuid4())
                 process_desc = row[0]
                 process_user = row[1]
                 process_command = row[2]
@@ -88,16 +80,14 @@ def main():
                 max_count = row[4]
                 begin_time_raw = row[5]
                 end_time_raw = row[6]
+                process_id = row[7]
 
                 begin_time = int(begin_time_raw.split(':')[0] + begin_time_raw.split(':')[1])
                 end_time = int(end_time_raw.split(':')[0] + end_time_raw.split(':')[1])
 
-                key = host_ip + process_user + process_command
-                id = str(uuid.uuid3(uuid.NAMESPACE_DNS, key))
-
-                sql = '''insert into {0} (UUID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
+                sql = '''insert into {0} (PROCESS_ID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
                       values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
-                para = [id,cur_version,write_time,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time]
+                para = [process_id,version,write_time,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time]
                 cursor.execute(sql,para)
                 counter += 1
     conn.commit()

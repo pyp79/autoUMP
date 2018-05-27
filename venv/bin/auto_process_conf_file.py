@@ -54,12 +54,12 @@ def main():
 
         with open(config_file_tmp,'w',encoding="UTF-8") as file:
             deploy_ip = row[0]
-            sql = "select UUID,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where DEPLOY_IP='{1}'".format(
+            sql = "select PROCESS_ID,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where DEPLOY_IP='{1}'".format(
                 PROCESS_CONF_TABLE, deploy_ip)
             cursor.execute(sql)
             rs = cursor.fetchall()
             for r in rs:
-                uuid = r[0]
+                process_id = r[0]
                 vip = r[1]
                 process_desc = r[2]
                 process_user = r[3]
@@ -68,7 +68,7 @@ def main():
                 max_count = r[6]
                 begin_time = r[7]
                 end_time = r[8]
-                content = "{0}#{1}#{2}#{3}#{4}#{5}#{6}#{7}#{8}\n".format(uuid,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time)
+                content = "{0}##{1}##{2}##{3}##{4}##{5}##{6}##{7}##{8}\n".format(process_id,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time)
                 file.write(content)
 
         if os.path.exists(config_file):

@@ -35,7 +35,7 @@ def clean_db(sql):
 
 def get_logger(FILENAME):
     conf = get_conf()
-    LOG_FILE =os.path.join(conf.get("BASE_CONF", "LOG_PATH") , FILENAME)
+    LOG_FILE =os.path.join(conf.get("LOG_FILE", "LOG_PATH") , FILENAME)
 
     # 设置log
     logger = logging.getLogger(__name__)

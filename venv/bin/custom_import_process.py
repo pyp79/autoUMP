@@ -56,7 +56,7 @@ def main():
             data_source = "CUSTOM"
 
             if action == 'ADD':
-                sql = '''insert into {0} (UUID,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,
+                sql = '''insert into {0} (PROCESS_ID,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,
                     PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_TYPE,DATA_SOURCE
                     ) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_TABLE)
                 para = (id,write_time,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time,process_type,data_source)
@@ -64,12 +64,12 @@ def main():
                 counter_add += 1
 
             elif action == 'DELETE':
-                sql = 'delete from {0} where UUID=%s'.format(PROCESS_TABLE)
+                sql = 'delete from {0} where PROCESS_ID=%s'.format(PROCESS_TABLE)
                 cursor.execute(sql,id)
                 counter_delete +=1
 
             elif action == 'UPDATE':
-                sql = 'update {0} set WRITE_TIME=%s,MIN_COUNT=%s,MAX_COUNT=%s,BEGIN_TIME=%s,END_TIME=%s,PROCESS_TYPE=%s,DATA_SOURCE=%s where UUID=%s'.format(PROCESS_TABLE)
+                sql = 'update {0} set WRITE_TIME=%s,MIN_COUNT=%s,MAX_COUNT=%s,BEGIN_TIME=%s,END_TIME=%s,PROCESS_TYPE=%s,DATA_SOURCE=%s where PROCESS_ID=%s'.format(PROCESS_TABLE)
                 print(sql)
                 para = (write_time,min_count,max_count,begin_time,end_time,process_type,data_source,id)
                 cursor.execute(sql,para)

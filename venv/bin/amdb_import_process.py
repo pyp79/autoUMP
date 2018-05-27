@@ -3,6 +3,8 @@
 #Author: Pang Yapeng
 
 import datetime
+import time
+import re
 import csv
 from sub_common import *
 
@@ -18,6 +20,7 @@ IP_TABLE = "AUTO_AMDB_IP_RAW"
 
 # 设置全局变量
 write_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+version = datetime.datetime.now().strftime('%Y%m%d')
 global counter_process
 global counter_ip
 
@@ -32,32 +35,15 @@ def main():
     conn = get_conn()
     cursor = conn.cursor()
 
-    sql = "select max(VERSION) from {0}".format(PROCESS_TABLE)
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    cur_version = rows[0][0]
+    sql = "delete from {0} where VERSION = %s".format(PROCESS_TABLE)
+    cursor.execute(sql,version)
+    sql = "delete from {0} where VERSION = %s".format(IP_TABLE)
+    cursor.execute(sql,version)
 
-    sql = "select min(VERSION) from {0}".format(PROCESS_TABLE)
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    min_version = rows[0][0]
-
-    if cur_version:
-        version = cur_version + 1
-    else:
-        version = 1
-        cur_version = 1
-
-    if not min_version:
-        min_version = 0
-
-    if cur_version - min_version > 2:
-        sql = "delete from {0} where VERSION = %s".format(PROCESS_TABLE)
-        cursor.execute(sql,min_version)
-        sql = "delete from {0} where VERSION = %s".format(IP_TABLE)
-        cursor.execute(sql, min_version)
-
-    with open(PROCESS_INFO, encoding="UTF-8") as csvfile:
+    v_date_para = re.findall(r"\[(.*)\]",PROCESS_INFO)[0]
+    new_date = time.strftime(v_date_para)
+    PROCESS_INFO_NEW = re.sub("\[.*\]",new_date,PROCESS_INFO)
+    with open(PROCESS_INFO_NEW, encoding="UTF-8") as csvfile:
         data = csv.DictReader(csvfile)
         for row in data:
             sql = '''insert into {0} (VERSION,WRITE_TIME,SERVICE_ID,APP_CODE,IP_ADDRESS,PROCESS_USER,
@@ -70,7 +56,10 @@ def main():
             cursor.execute(sql,para)
             counter_process += 1
 
-    with open(IP_INFO, encoding="GBK") as csvfile:
+    v_date_para = re.findall(r"\[(.*)\]",IP_INFO)[0]
+    new_date = time.strftime(v_date_para)
+    IP_INFO_NEW = re.sub("\[.*\]",new_date,IP_INFO)
+    with open(IP_INFO_NEW, encoding="UTF-8") as csvfile:
         data = csv.DictReader(csvfile)
         for row in data:
             sql = '''insert into {0} (VERSION,WRITE_TIME,APP_CODE,IP_ADDRESS,SERVICE_IP,IP_TYPE) 

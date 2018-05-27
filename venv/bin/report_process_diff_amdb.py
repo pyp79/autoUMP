@@ -30,11 +30,11 @@ def main():
     rows = cursor.fetchall()
     cur_version = rows[0][0]
 
-    sql = "select UUID,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where VERSION={1}".format(PROCESS_AMDB_TABLE,cur_version)
+    sql = "select PROCESS_ID,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where VERSION={1}".format(PROCESS_AMDB_TABLE,cur_version)
     cursor.execute(sql)
     amdb_rows = cursor.fetchall()
 
-    sql = "select UUID,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where PROCESS_TYPE='APP'".format(PROCESS_CONF_TABLE)
+    sql = "select PROCESS_ID,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where PROCESS_TYPE='APP'".format(PROCESS_CONF_TABLE)
     cursor.execute(sql)
     ump_rows = cursor.fetchall()
 
@@ -44,7 +44,7 @@ def main():
     if amdb_std:
         for row in amdb_std:
             id = row[0]
-            sql = "update {0} set UMP_SYNC_STATUS = 'N' where UUID=%s and VERSION={1}".format(PROCESS_AMDB_TABLE,cur_version)
+            sql = "update {0} set UMP_SYNC_STATUS = 'N' where PROCESS_ID=%s and VERSION={1}".format(PROCESS_AMDB_TABLE,cur_version)
             cursor.execute(sql,id)
 
     ump_std = set(ump_rows).difference(set(amdb_rows))
@@ -53,7 +53,7 @@ def main():
     if ump_std:
         for row in ump_std:
             id = row[0]
-            sql = "update {0} set AMDB_SYNC_STATUS = 'N' where UUID=%s".format(PROCESS_CONF_TABLE)
+            sql = "update {0} set AMDB_SYNC_STATUS = 'N' where PROCESS_ID=%s".format(PROCESS_CONF_TABLE)
             cursor.execute(sql,id)
 
     conn.commit()
