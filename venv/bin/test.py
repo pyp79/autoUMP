@@ -9,11 +9,20 @@ import pymysql
 import os
 import configparser
 
-cur_path = os.path.dirname(os.path.realpath(__file__))
-config_path = os.path.join(cur_path, '../conf/config.ini')
-conf = configparser.ConfigParser()
-conf.read(config_path, encoding='utf-8-sig')
+import hashlib
 
-logfile = conf.get("SOURCE_FILE", "TEST")
-print(logfile)
+# 待加密信息
+str = 'EBMP'+'PBGateway'+'10.1.96.3'+'ebmp'
+
+# 创建md5对象
+hl = hashlib.md5()
+
+# Tips
+# 此处必须声明encode
+# 若写法为hl.update(str)  报错为： Unicode-objects must be encoded before hashing
+#hl.update(str)
+hl.update(str.encode(encoding='utf-8'))
+
+print('MD5加密前为 ：' + str)
+print('MD5加密后为 ：' + hl.hexdigest())
 
