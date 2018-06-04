@@ -46,11 +46,11 @@ def main():
     with open(PROCESS_INFO_NEW, encoding="UTF-8") as csvfile:
         data = csv.DictReader(csvfile)
         for row in data:
-            sql = '''insert into {0} (VERSION,WRITE_TIME,SERVICE_ID,APP_CODE,IP_ADDRESS,PROCESS_USER,
+            sql = '''insert into {0} (VERSION,WRITE_TIME,PROCESS_ID,SERVICE_ID,APP_CODE,IP_ADDRESS,PROCESS_USER,
                 PROCESS_COMMAND,PROCESS_DESC,PROCESS_NUM,IS_LOADBALANCE,HOST_ROLE,USERS_IN_BANK,USERS_TOTAL,USERS_ROLE,
                 USERS_TYPE,PROCESS_ALIAS,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME
-                ) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_TABLE)
-            para = (version,write_time,row['SERVICE_ID'],row['APP_CODE'],row['IP_ADDRESS'],row['PROCESS_USER'], row['PROCESS_COMMAND'],row['PROCESS_DESC'],row['PROCESS_NUM'],row['IS_LOADBALANCE'], \
+                ) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_TABLE)
+            para = (version,write_time,row['PROCESS_ID'],row['SERVICE_ID'],row['APP_CODE'],row['IP_ADDRESS'],row['PROCESS_USER'], row['PROCESS_COMMAND'],row['PROCESS_DESC'],row['PROCESS_NUM'],row['IS_LOADBALANCE'], \
                                  row['HOST_ROLE'],row['USERS_IN_BANK'],row['USERS_TOTAL'],row['USERS_ROLE'],row['USERS_TYPE'], \
                                  row['PROCESS_ALIAS'],row['MIN_COUNT'],row['MAX_COUNT'],row['BEGIN_TIME'],row['END_TIME'])
             cursor.execute(sql,para)
