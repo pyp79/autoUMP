@@ -3,9 +3,11 @@
 #Author: Pang Yapeng
 
 import datetime
+import time
 import csv
 import uuid
 from sub_common import *
+from hashlib import md5
 
 # 设置log
 logger = get_logger("import_auto.log")
@@ -34,10 +36,14 @@ def main():
     conn = get_conn()
     cursor = conn.cursor()
 
-    with open(PROCESS_INFO, encoding="UTF-8") as csvfile:
+    v_date_para = re.findall(r"\[(.*)\]",PROCESS_INFO)[0]
+    new_date = time.strftime(v_date_para)
+    PROCESS_INFO_NEW = re.sub("\[.*\]",new_date,PROCESS_INFO)
+    with open(PROCESS_INFO_NEW, encoding="UTF-8") as csvfile:
         data = csv.DictReader(csvfile)
         for row in data:
             action = row['ACTION']
+            app_code = row['APP_CODE']
             deploy_ip = row['DEPLOY_IP']
             host_ip = row['HOST_IP']
             vip = row['VIP']
@@ -50,16 +56,16 @@ def main():
             end_time = row['END_TIME']
             process_type = row['PROCESS_TYPE']
 
-            key = host_ip + process_user + process_command
-            id = str(uuid.uuid3(uuid.NAMESPACE_DNS, key))
+            key = app_code + process_command + deploy_ip + process_user
+            id = md5(bytearray(key,encoding='UTF-8')).hexdigest()
 
             data_source = "CUSTOM"
 
             if action == 'ADD':
-                sql = '''insert into {0} (PROCESS_ID,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,
+                sql = '''insert into {0} (PROCESS_ID,WRITE_TIME,APP_CODE,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,
                     PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_TYPE,DATA_SOURCE
-                    ) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_TABLE)
-                para = (id,write_time,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time,process_type,data_source)
+                    ) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_TABLE)
+                para = (id,write_time,app_code,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time,process_type,data_source)
                 cursor.execute(sql,para)
                 counter_add += 1
 

@@ -29,7 +29,7 @@ def main():
     sql = "delete from {0} where DATA_SOURCE = 'AMDB'".format(PROCESS_CONF_TABLE)
     cursor.execute(sql)
 
-    sql = "select PROCESS_ID,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where VERSION={1}".format(PROCESS_TABLE,version)
+    sql = "select PROCESS_ID,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,APP_CODE from {0} where VERSION={1}".format(PROCESS_TABLE,version)
     cursor.execute(sql)
     rows = cursor.fetchall()
     for row in rows:
@@ -44,11 +44,13 @@ def main():
         max_count = row[8]
         begin_time = row[9]
         end_time = row[10]
+        app_code = row[11]
+
         process_type = "APP"
         data_source = "AMDB"
-        sql = '''insert into {0} (PROCESS_ID,AMDB_VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,PROCESS_TYPE,DATA_SOURCE,BEGIN_TIME,END_TIME) 
-               values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
-        para = [process_id, version, write_time, deploy_ip, host_ip, vip, process_desc, process_user,
+        sql = '''insert into {0} (PROCESS_ID,AMDB_VERSION,WRITE_TIME,APP_CODE,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,PROCESS_TYPE,DATA_SOURCE,BEGIN_TIME,END_TIME) 
+               values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
+        para = [process_id, version, write_time, app_code, deploy_ip, host_ip, vip, process_desc, process_user,
                             process_command, min_count, max_count,process_type,data_source,begin_time,end_time]
         cursor.execute(sql, para)
         counter += 1

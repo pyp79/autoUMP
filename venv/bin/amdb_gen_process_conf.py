@@ -40,7 +40,7 @@ def main():
             for host_ip in ip_list:
                 deploy_ip = host_ip
                 vip = ip_address
-                sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_ID from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(
+                sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_ID,APP_CODE from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(
                     PROCESS_TABLE, ip_address,version)
                 cursor.execute(sql)
                 rows = cursor.fetchall()
@@ -53,13 +53,14 @@ def main():
                     begin_time_raw = row[5]
                     end_time_raw = row[6]
                     process_id = row[7]
+                    app_code = row[8]
 
                     begin_time = int(begin_time_raw.split(':')[0] + begin_time_raw.split(':')[1])
                     end_time = int(end_time_raw.split(':')[0] + end_time_raw.split(':')[1])
 
-                    sql = '''insert into {0} (PROCESS_ID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
-                          values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
-                    para = [process_id, version, write_time, deploy_ip, host_ip, vip, process_desc, process_user,
+                    sql = '''insert into {0} (PROCESS_ID,VERSION,WRITE_TIME,APP_CODE,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
+                          values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
+                    para = [process_id, version, write_time, app_code, deploy_ip, host_ip, vip, process_desc, process_user,
                             process_command, min_count, max_count,begin_time,end_time]
                     cursor.execute(sql, para)
                     counter += 1
@@ -69,7 +70,7 @@ def main():
             host_ip = ip_address
             vip = ip_address
 
-            sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_ID from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(PROCESS_TABLE,ip_address,version)
+            sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_ID,APP_CODE from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(PROCESS_TABLE,ip_address,version)
             cursor.execute(sql)
             rows = cursor.fetchall()
             for row in rows:
@@ -81,13 +82,14 @@ def main():
                 begin_time_raw = row[5]
                 end_time_raw = row[6]
                 process_id = row[7]
+                app_code = row[8]
 
                 begin_time = int(begin_time_raw.split(':')[0] + begin_time_raw.split(':')[1])
                 end_time = int(end_time_raw.split(':')[0] + end_time_raw.split(':')[1])
 
-                sql = '''insert into {0} (PROCESS_ID,VERSION,WRITE_TIME,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
-                      values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
-                para = [process_id,version,write_time,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time]
+                sql = '''insert into {0} (PROCESS_ID,VERSION,WRITE_TIME,APP_CODE,DEPLOY_IP,HOST_IP,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME) 
+                      values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''.format(PROCESS_CONF_TABLE)
+                para = [process_id,version,write_time,app_code,deploy_ip,host_ip,vip,process_desc,process_user,process_command,min_count,max_count,begin_time,end_time]
                 cursor.execute(sql,para)
                 counter += 1
     conn.commit()
