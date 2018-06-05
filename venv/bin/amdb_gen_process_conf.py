@@ -17,6 +17,7 @@ IP_TABLE = "AUTO_AMDB_IP_RAW"
 write_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 version = datetime.datetime.now().strftime('%Y%m%d')
 global counter
+global mapip_to_hostip
 
 def main():
     global counter
@@ -66,9 +67,15 @@ def main():
                     counter += 1
 
         else:
-            deploy_ip = ip_address
-            host_ip = ip_address
-            vip = ip_address
+            mapip_to_hostip()
+            try:
+                host_ip = mapip_list[ip_address]
+                vip = mapip_list[ip_address]
+                deploy_ip = ip_address
+            except:
+                host_ip = ip_address
+                vip = ip_address
+                deploy_ip = ip_address
 
             sql = "select PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME,PROCESS_ID,APP_CODE from {0} where IP_ADDRESS='{1}' and VERSION='{2}'".format(PROCESS_TABLE,ip_address,version)
             cursor.execute(sql)
@@ -123,6 +130,18 @@ def vip_to_hostip(version,ip_address):
         ip_list.append(row[0])
     return ip_list
 
+def mapip_to_hostip():
+    global mapip_list
+    mapip_list = {}
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = "select MAPPINGIP,PHYSICIP from CMDB_OS_RAW where MAPPINGIP != 'None' and USETYPE='生产机'"
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    for row in rows:
+        mapip_list[row[0]] = row[1]
+    return mapip_list
 
 if __name__ == '__main__':
         main()
