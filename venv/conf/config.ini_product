@@ -1,0 +1,25 @@
+[LOG_FILE]
+BASE_PATH = C:/PycharmProjects/autoUMP/venv
+LOG_PATH = %(BASE_PATH)s/logs
+
+[MYSQL]
+DB_IP = 192.168.3.155
+DB_PORT = 3333
+DB_USER = ump
+DB_PASSWORD = 123456
+DB_SCHEMA = ump
+DB_CHARSET = utf8
+
+
+[SOURCE_FILE]
+BASE_PATH = C:/PycharmProjects/autoUMP/venv
+AMDB_PROCESS_INFO = %(BASE_PATH)s/src/ump_processinfo_[%%Y%%m%%d].csv
+AMDB_IP_INFO = %(BASE_PATH)s/src/ump_ip_floatip_relation_[%%Y%%m%%d].csv
+CUSTOM_PROCESS_INFO = %(BASE_PATH)s/src/custom_process_[%%Y%%m%%d].csv
+AMDB_COREFILE_INFO = %(BASE_PATH)s/src/ump_corefileinfo_[%%Y%%m%%d].csv
+AMDB_PORT_INFO = %(BASE_PATH)s/src/ump_portinfo_[%%Y%%m%%d].csv
+
+[DEST_FILE]
+BASE_PATH = C:/PycharmProjects/autoUMP/venv
+GEN_PROCESS_CONF_PATH = %(BASE_PATH)s/REPO/PROCESS
+PROCESS_LOOKUP_FILE = %(BASE_PATH)s/REPO/PROCESS/ITM_M03_Process.lookup

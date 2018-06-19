@@ -16,6 +16,7 @@ logger = get_logger("process.log")
 conf = get_conf()
 CONF_PATH = conf.get("DEST_FILE", "GEN_PROCESS_CONF_PATH")
 PROCESS_CONF_TABLE = "AUTO_PROCESS_CONF"
+LOOKUP_FILE = oconf.get("DEST_FILE", "PROCESS_LOOKUP_FILE")
 
 # 设置全局变量
 write_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -33,8 +34,9 @@ def main():
     #创建根目录
     mkdir(CONF_PATH)
 
-    #创建配置变更日志文件
+    # 变更日志文件
     change_log_file = os.path.join(CONF_PATH, "process_change_log.log")
+
 
 
     conn = get_conn()
@@ -98,6 +100,31 @@ def main():
                     change_log.write(change_log_content)
         pass
     conn.close()
+    logger.info("Finish to generate process config file:%s", CONF_PATH)
+
+    logger.info("Begin to generate lookup file:%s", LOOKUP_FILE)
+    gen_lookup_file(LOOKUP_FILE)
+    logger.info("Finish to generate lookup file:%s", LOOKUP_FILE)
+
+def gen_lookup_file(LOOKUP_FILE):
+    conn = get_conn()
+    cursor = conn.cursor()
+    sql = "select PROCESS_ID,PROCESS_DESC,PROCESS_COMMAND from {0}".format(PROCESS_CONF_TABLE)
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    with open(LOOKUP_FILE, 'w', encoding="UTF-8") as file:
+        for row in rows:
+            process_id = row[0]
+            process_desc = row[1]
+            process_command = row[2]
+            process_enrich = process_desc + ":" + process_command
+            if len(process_enrich) > 48:
+                process_enrich = process_enrich[:47]
+            file_content = "{0}\t{1}\n".format(process_id,process_enrich)
+            file.write(file_content)
+    file.close()
+    conn.close()
+
 
 
 def mkdir(path):
