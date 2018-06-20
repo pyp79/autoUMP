@@ -56,21 +56,21 @@ def main():
             cursor.execute(sql,para)
             counter_process += 1
 
-    v_date_para = re.findall(r"\[(.*)\]",IP_INFO)[0]
-    new_date = time.strftime(v_date_para)
-    IP_INFO_NEW = re.sub("\[.*\]",new_date,IP_INFO)
-    with open(IP_INFO_NEW, encoding="UTF-8") as csvfile:
-        data = csv.DictReader(csvfile)
-        for row in data:
-            sql = '''insert into {0} (VERSION,WRITE_TIME,APP_CODE,IP_ADDRESS,SERVICE_IP,IP_TYPE) 
-                values(%s,%s,%s,%s,%s,%s)'''.format(IP_TABLE)
-            if row['IP_ADDRESS'] == row['SERVICE_IP']:
-                ip_type = 'VIP'
-            else:
-                ip_type = 'HOST_IP'
-            para = (version,write_time,row['APP_CODE'],row['IP_ADDRESS'],row['SERVICE_IP'], ip_type)
-            cursor.execute(sql,para)
-            counter_ip += 1
+    # v_date_para = re.findall(r"\[(.*)\]",IP_INFO)[0]
+    # new_date = time.strftime(v_date_para)
+    # IP_INFO_NEW = re.sub("\[.*\]",new_date,IP_INFO)
+    # with open(IP_INFO_NEW, encoding="UTF-8") as csvfile:
+    #     data = csv.DictReader(csvfile)
+    #     for row in data:
+    #         sql = '''insert into {0} (VERSION,WRITE_TIME,APP_CODE,IP_ADDRESS,SERVICE_IP,IP_TYPE)
+    #             values(%s,%s,%s,%s,%s,%s)'''.format(IP_TABLE)
+    #         if row['IP_ADDRESS'] == row['SERVICE_IP']:
+    #             ip_type = 'VIP'
+    #         else:
+    #             ip_type = 'HOST_IP'
+    #         para = (version,write_time,row['APP_CODE'],row['IP_ADDRESS'],row['SERVICE_IP'], ip_type)
+    #         cursor.execute(sql,para)
+    #         counter_ip += 1
 
     conn.commit()
     conn.close()

@@ -52,7 +52,7 @@ def main():
         config_file_backup = os.path.join(config_file_path,"M03_Process_Auto.conf.bak")
         config_file_tmp = os.path.join(config_file_path,"M03_Process_Auto.conf.tmp")
 
-        with open(config_file_tmp,'w',encoding="UTF-8") as file:
+        with open(config_file_tmp,'w',encoding="gb2312") as file:
             deploy_ip = row[0]
             sql = "select PROCESS_ID,VIP,PROCESS_DESC,PROCESS_USER,PROCESS_COMMAND,MIN_COUNT,MAX_COUNT,BEGIN_TIME,END_TIME from {0} where DEPLOY_IP='{1}'".format(
                 PROCESS_CONF_TABLE, deploy_ip)
